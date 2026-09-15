@@ -4,4 +4,3 @@ __pycache__/
 .env
 .streamlit/secrets.toml
 data/dossiers/*
-models/*.pt
