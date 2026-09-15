@@ -1,0 +1,42 @@
+{
+  "dossier_id": "DOS-20260915-111935-9B5786",
+  "marque": "fiat",
+  "modele": "fiat500",
+  "matricule": "2345-B-3",
+  "expert": "CABEK",
+  "created_at": "2026-09-15T11:19:35",
+  "status": "À valider",
+  "photos": [
+    {
+      "view": "avant",
+      "view_label": "Vue avant",
+      "filename": "avant_01.jpg",
+      "path": "photos\\avant_01.jpg"
+    },
+    {
+      "view": "arriere",
+      "view_label": "Vue arrière",
+      "filename": "arriere_01.jpg",
+      "path": "photos\\arriere_01.jpg"
+    },
+    {
+      "view": "gauche",
+      "view_label": "Vue gauche",
+      "filename": "gauche_01.jpg",
+      "path": "photos\\gauche_01.jpg"
+    },
+    {
+      "view": "droite",
+      "view_label": "Vue droite",
+      "filename": "droite_01.jpg",
+      "path": "photos\\droite_01.jpg"
+    },
+    {
+      "view": "details",
+      "view_label": "Détails dommages",
+      "filename": "details_01.jpg",
+      "path": "photos\\details_01.jpg"
+    }
+  ],
+  "updated_at": "2026-09-15T11:41:33"
+}

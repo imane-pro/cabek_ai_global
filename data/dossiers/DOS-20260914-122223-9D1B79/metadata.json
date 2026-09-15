@@ -1,0 +1,42 @@
+{
+  "dossier_id": "DOS-20260914-122223-9D1B79",
+  "marque": "toyota",
+  "modele": "corolla",
+  "matricule": "1234-A-6",
+  "expert": "cabek",
+  "created_at": "2026-09-14T12:22:23",
+  "status": "À valider",
+  "photos": [
+    {
+      "view": "avant",
+      "view_label": "Vue avant",
+      "filename": "avant_01.jpeg",
+      "path": "photos\\avant_01.jpeg"
+    },
+    {
+      "view": "arriere",
+      "view_label": "Vue arrière",
+      "filename": "arriere_01.png",
+      "path": "photos\\arriere_01.png"
+    },
+    {
+      "view": "gauche",
+      "view_label": "Vue gauche",
+      "filename": "gauche_01.jpg",
+      "path": "photos\\gauche_01.jpg"
+    },
+    {
+      "view": "droite",
+      "view_label": "Vue droite",
+      "filename": "droite_01.jpg",
+      "path": "photos\\droite_01.jpg"
+    },
+    {
+      "view": "details",
+      "view_label": "Détails dommages",
+      "filename": "details_01.jpeg",
+      "path": "photos\\details_01.jpeg"
+    }
+  ],
+  "updated_at": "2026-09-14T18:10:39"
+}

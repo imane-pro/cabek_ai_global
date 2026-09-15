@@ -3,4 +3,4 @@ __pycache__/
 .venv/
 .env
 .streamlit/secrets.toml
-data/dossiers/*
+
