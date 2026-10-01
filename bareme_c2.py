@@ -1,14 +1,13 @@
 """
 bareme_c2.py — Barème de chiffrage Cabek, catégorie véhicule C2
 =================================================================
-Contient les tableaux réels (extraits des fichiers Excel/PDF fournis),
+Contient les 3 tableaux réels (extraits des fichiers Excel fournis),
 le registre de correspondance entre pièces, et les fonctions de calcul
-du coût de réparation ET de remplacement par dommage.
+du coût de réparation par dommage.
 
 Logique retenue (validée) :
-    Réparation = MO Réparation (heures × tarif) + MOP (heures × tarif) + MET (DH, valeur directe)
-    Remplacement = MOT (heures × tarif) + prix de la pièce (fourni par l'appelant,
-                   typiquement via l'API AutoEstimate — voir parts_pricing.py)
+    Total = MO Réparation (heures × tarif) + MOP (heures × tarif) + MET (DH, valeur directe)
+    - MOT (changement de pièce) : IGNORÉ
     - UN / NAC (peinture unie / nacrée) : IGNORÉS, seul MET (métallisée) est utilisé
 """
 
@@ -80,19 +79,20 @@ BAREME_MET_DH = {
     "BAS DE CAISSE": 234,
 }
 
+
+
 # ══════════════════════════════════════════════════════════════
 # 4. REGISTRE DES PIÈCES — fait le lien entre UNE pièce "canonique"
-#    et sa clé dans CHACUN des 4 tableaux (les granularités diffèrent
+#    et sa clé dans CHACUN des 3 tableaux (les granularités diffèrent
 #    d'un tableau à l'autre, ex: MET ne distingue pas gauche/droite).
 #    `None` = donnée absente de ce tableau pour cette pièce.
 # ══════════════════════════════════════════════════════════════
 
 # ⚠️ Le modèle IA a UNE seule classe "p_Roue" pour les jantes, alors que
-# le barème réparation distingue JANTE ALUM / JANTE ACIER (heures
-# différentes). Impossible de deviner le matériau depuis la détection
-# seule → on doit choisir un défaut. "roue_acier" est retenu ici (le
-# plus courant/le plus conservateur en coût) — change vers "roue_alu"
-# ci-dessous si tu préfères.
+# le barème distingue JANTE ALUM / JANTE ACIER (heures différentes).
+# Impossible de deviner le matériau depuis la détection seule → on doit
+# choisir un défaut. "roue_acier" est retenu ici (le plus courant/le plus
+# conservateur en coût) — change vers "roue_alu" ci-dessous si tu préfères.
 ROUE_DEFAUT = "roue_acier"  # ou "roue_alu"
 
 PIECES_C2 = {
@@ -109,10 +109,10 @@ PIECES_C2 = {
     "aile_arriere_droite": {"nom": "Aile arrière droite",    "reparation": "AILE ARD",       "mop": "AILE ARD",                "met": "AILE AR"},
     "capot":               {"nom": "Capot moteur",           "reparation": "CAPOT MOTEUR",   "mop": "CAPOT MOTEUR",           "met": "CAPOT"},
     "malle_arriere":       {"nom": "Coffre / Malle arrière", "reparation": "MALLE AR",       "mop": "MALLE AR",               "met": "MALLE"},
-    "porte_avant":         {"nom": "Porte avant",            "reparation": "PORTE AVG/AVD",  "mop": "PORTE AVG/AVD",          "met": "PORTE"},  # absent du barème MOT fourni
-    "porte_arriere":       {"nom": "Porte arrière",          "reparation": "PORTE ARG/ARD",  "mop": "PORTE ARG/ARD",          "met": "PORTE"},  # absent du barème MOT fourni
-    "bas_de_caisse":       {"nom": "Bas de caisse",          "reparation": "BAS CAISSE G/D", "mop": "BAS CAISSE G/D",         "met": "BAS DE CAISSE"},  # absent du barème MOT fourni
-    "retroviseur":         {"nom": "Rétroviseur",            "reparation": "RETROVISEUR G/D","mop": "RETROVISEUR G/D",        "met": None},  # absent du barème MOT fourni
+    "porte_avant":         {"nom": "Porte avant",            "reparation": "PORTE AVG/AVD",  "mop": "PORTE AVG/AVD",          "met": "PORTE"},
+    "porte_arriere":       {"nom": "Porte arrière",          "reparation": "PORTE ARG/ARD",  "mop": "PORTE ARG/ARD",          "met": "PORTE"},
+    "bas_de_caisse":       {"nom": "Bas de caisse",          "reparation": "BAS CAISSE G/D", "mop": "BAS CAISSE G/D",         "met": "BAS DE CAISSE"},
+    "retroviseur":         {"nom": "Rétroviseur",            "reparation": "RETROVISEUR G/D","mop": "RETROVISEUR G/D",        "met": None},
     "roue_alu":            {"nom": "Roue (jante alu)",       "reparation": "JANTE ALUM",     "mop": "JANTE AVG/AVD.ARG/ARD",  "met": None},
     "roue_acier":          {"nom": "Roue (jante acier)",     "reparation": "JANTE ACIER",    "mop": "JANTE AVG/AVD.ARG/ARD",  "met": None},
 }
@@ -120,10 +120,6 @@ PIECES_C2 = {
 # ══════════════════════════════════════════════════════════════
 # 5. MAPPING : classe du modèle IA "pièces"  →  clé canonique ci-dessus
 #    ✅ Noms EXACTS confirmés par Cabek — correspondance validée.
-#    ⚠️ Le modèle IA renvoie des NOMS de classes (texte), pas des IDs —
-#    c'est ce dictionnaire qui fait tout le pont entre le texte détecté
-#    et les barèmes internes. La même logique de "nom → id" se répète
-#    plus loin pour l'API AutoEstimate (voir parts_mapping.py).
 # ══════════════════════════════════════════════════════════════
 AI_PIECE_VERS_CANONICAL = {
     "p_Pare-chocs avant":     "pare_choc_avant",
@@ -169,12 +165,11 @@ LABEL_GRAVITE_BAREME = {"leger": "Léger", "moyen": "Moyen", "fort": "Fort"}
 
 # ══════════════════════════════════════════════════════════════
 # 7. Types de dommage qui NE relèvent PAS d'une réparation classique
-#    (nécessitent un remplacement de pièce → voir bareme_mot.calculer_cout_remplacement)
+#    (nécessitent un remplacement de pièce / MOT+fourniture, non couverts
+#    par ce barème puisque MOT est volontairement ignoré) → à chiffrer
+#    manuellement plutôt que de donner un montant potentiellement faux.
 # ══════════════════════════════════════════════════════════════
 DOMMAGES_HORS_BAREME_REPARATION = {"d_piece_manquante", "d_casse", "d_crevaison", "d_brise"}
-
-# Types de pièce reconnus par l'API AutoEstimate (prix pièce)
-TYPES_PIECE_API = ("original", "adaptable", "occasion")
 
 
 def calculer_cout_dommage(piece_ai: str, type_dommage: str, niveau_gravite: str) -> dict:
@@ -187,14 +182,15 @@ def calculer_cout_dommage(piece_ai: str, type_dommage: str, niveau_gravite: str)
     "erreur"/"avertissement" si une donnée manque ou si le type de dommage
     n'est pas couvert par ce barème.
     """
-    # ── Cas des dommages nécessitant un remplacement (hors barème réparation) ──
+    # ── Cas des dommages nécessitant un remplacement (hors barème actuel) ──
     if type_dommage in DOMMAGES_HORS_BAREME_REPARATION:
         return {
             "piece_ai": piece_ai,
             "type_dommage": type_dommage,
             "avertissement": (
-                f"'{type_dommage}' nécessite un remplacement de pièce (MOT + prix pièce). "
-                "Voir bareme_mot.calculer_cout_remplacement()."
+                f"'{type_dommage}' nécessite un remplacement de pièce (MOT + fourniture), "
+                f"non couvert par ce barème (MOT volontairement ignoré). "
+                f"À chiffrer manuellement par un expert."
             ),
             "total": None,
         }
