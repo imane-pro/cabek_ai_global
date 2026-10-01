@@ -1,18 +1,15 @@
 {
-  "dossier_id": "DOS-20260915-111935-9B5786",
-  "marque": "fiat",
-  "modele": "fiat500",
-  "matricule": "2345-B-3",
-  "expert": "CABEK",
-  "created_at": "2026-09-15T11:19:35",
+  "dossier_id": "DOS-20260926-042055-31A121",
+  "marque": "Dacia",
+  "marque_id": 10,
+  "modele": "Dokker",
+  "model_id": 71,
+  "annee": "2025",
+  "matricule": "4569-B-8",
+  "expert": "",
+  "created_at": "2026-09-26T04:20:55",
   "status": "À valider",
   "photos": [
-    {
-      "view": "avant",
-      "view_label": "Vue avant",
-      "filename": "avant_01.jpg",
-      "path": "photos\\avant_01.jpg"
-    },
     {
       "view": "arriere",
       "view_label": "Vue arrière",
@@ -36,7 +33,13 @@
       "view_label": "Détails dommages",
       "filename": "details_01.jpg",
       "path": "photos\\details_01.jpg"
+    },
+    {
+      "view": "avant",
+      "view_label": "Vue avant",
+      "filename": "avant_01.jpg",
+      "path": "photos\\avant_01.jpg"
     }
   ],
-  "updated_at": "2026-09-21T13:50:45"
+  "updated_at": "2026-09-26T04:25:05"
 }

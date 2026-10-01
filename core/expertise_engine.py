@@ -4,6 +4,7 @@ Compatible avec les poids YOLO actuellement utilisés par l'application.
 import cv2
 import numpy as np
 from bareme_c2 import calculer_cout_dommage, TARIF_REPARATION_DH, TARIF_MOP_DH
+from bareme_t1 import calculer_cout_remplacement
 
 POIDS_CATEGORIE = {
     "d_brise":           0.9,
@@ -85,7 +86,57 @@ def gravite_max(niveau_a: str, niveau_b: str) -> str:
         return niveau_b
     return niveau_a
 
+def calculer_detail_fourniture(instances):
+    """
+    Calcule le détail des pièces à fournir pour les remplacements.
 
+    Retourne :
+        - lignes : détail pièce par pièce
+        - total_fourniture : somme des prix disponibles
+        - n_avec_prix : nombre de pièces avec prix
+        - n_sans_prix : nombre de pièces sans prix
+        - complet : True si toutes les pièces ont un prix
+    """
+
+    lignes = []
+    total_fourniture = 0.0
+    n_avec_prix = 0
+    n_sans_prix = 0
+
+    for item in instances:
+
+        # Seules les pièces nécessitant un remplacement
+        # sont prises en compte dans la fourniture.
+        if not item.get("remplacement_requis"):
+            continue
+
+        prix_piece = item.get("prix_piece")
+        type_piece = item.get("type_piece")
+
+        if prix_piece is not None:
+            try:
+                prix_piece = float(prix_piece)
+                total_fourniture += prix_piece
+                n_avec_prix += 1
+            except (TypeError, ValueError):
+                prix_piece = None
+                n_sans_prix += 1
+        else:
+            n_sans_prix += 1
+
+        lignes.append({
+            "piece": item.get("piece", "—"),
+            "type_piece": type_piece,
+            "prix_piece": prix_piece,
+        })
+
+    return {
+        "lignes": lignes,
+        "total_fourniture": total_fourniture,
+        "n_avec_prix": n_avec_prix,
+        "n_sans_prix": n_sans_prix,
+        "complet": n_sans_prix == 0,
+    }
 def necessite_remplacement(item: dict) -> bool:
     """Détermine si le dommage impose le remplacement complet de la pièce."""
 
@@ -113,7 +164,11 @@ def appliquer_priorite_remplacement(instances: list) -> list:
     Applique la règle métier au niveau de chaque pièce.
 
     Si une pièce contient au moins un dommage de remplacement :
-      - le dommage déclencheur est marqué remplacement_requis ;
+      - le dommage déclencheur est marqué remplacement_requis, et son
+        coût MOT (main d'œuvre échange, barème interne C2) est calculé
+        immédiatement — seul le prix de la pièce reste en attente
+        (typiquement rempli ensuite via l'API AutoEstimate, voir
+        parts_pricing.py, car il dépend du véhicule/année/type de pièce) ;
       - les autres dommages sont bloqués et leur coût est annulé ;
       - ils ne sont pas comptés comme lignes à chiffrer.
     """
@@ -135,31 +190,37 @@ def appliquer_priorite_remplacement(instances: list) -> list:
         if necessite_remplacement(item):
             item["remplacement_requis"] = True
             item["chiffrage_bloque"] = False
-            item["cout"] = None
 
+            # MOT (main d'œuvre échange) calculable immédiatement, sans
+            # attendre le prix pièce — celui-ci vient de l'API AutoEstimate
+            # et sera injecté séparément (voir enrichir_couts_remplacement
+            # dans la page Streamlit, une fois marque/modèle/année connus).
+            detail_remplacement = calculer_cout_remplacement(piece)
+            item["cout"] = detail_remplacement.get("total")  # None tant que prix_piece absent
+            item["cout_mot"] = detail_remplacement.get("cout_mot")
+            item["heures_mot"] = detail_remplacement.get("heures_mot")
+
+            avertissement_base = detail_remplacement.get("avertissement", "")
             if item.get("type_brut") == "d_bosse" and item.get("zone_critique_detectee") is True:
                 avertissement = (
                     "Dommage situé sur une zone critique (arête / bord / zone "
                     "structurelle) détectée par le modèle IA — remplacement "
                     "complet de la pièce imposé, indépendamment de la surface "
-                    "touchée ou de la gravité apparente. Le prix de la pièce et "
-                    "la main-d'œuvre de remplacement ne sont pas couverts par le "
-                    "barème C2 actuel. À chiffrer manuellement par un expert."
+                    "touchée ou de la gravité apparente. " + avertissement_base
                 )
             else:
-                avertissement = (
-                    "Ce dommage nécessite le remplacement complet de la pièce. "
-                    "Le prix de la pièce et la main-d'œuvre de remplacement ne "
-                    "sont pas couverts par le barème C2 actuel. À chiffrer "
-                    "manuellement par un expert."
-                )
+                avertissement = "Ce dommage nécessite le remplacement complet de la pièce. " + avertissement_base
 
             item["cout_detail"] = {
                 "type": "remplacement",
                 "remplacement_requis": True,
-                "total": None,
+                "cout_mot": detail_remplacement.get("cout_mot"),
+                "heures_mot": detail_remplacement.get("heures_mot"),
+                "prix_piece": detail_remplacement.get("prix_piece"),
+                "type_piece": detail_remplacement.get("type_piece"),
+                "total": detail_remplacement.get("total"),
                 "declencheur_zone_critique": item.get("zone_critique_detectee", False),
-                "avertissement": avertissement,
+                "avertissement": avertissement.strip(),
             }
             item["solution"] = "Remplacement complet de la pièce"
         else:
@@ -177,6 +238,84 @@ def appliquer_priorite_remplacement(instances: list) -> list:
                 ),
             }
             item["solution"] = "Non chiffré séparément — remplacement de la pièce requis"
+
+    return instances
+
+
+def item_key(item: dict) -> str:
+    """
+    Identifiant stable pour un dommage, indépendant de l'ordre d'affichage
+    (la page trie par score, qui ne change pas d'un rerun à l'autre mais
+    ne doit pas être utilisé comme clé — un identifiant basé sur le
+    contenu est plus sûr). Utilisé pour associer un widget Streamlit
+    (sélecteur de type de pièce) à un dommage précis.
+    """
+    sources = ",".join(item.get("images_sources", []))
+    return f"{item.get('piece_ai_brut','?')}|{item.get('type_brut','?')}|{sources}"
+
+
+def enrichir_prix_pieces(
+    instances: list,
+    marque_id: int | None,
+    model_id: int | None,
+    year: int | None,
+    types_choisis: dict,
+) -> list:
+    """
+    Complète le coût des dommages "remplacement_requis" avec le prix pièce
+    récupéré via l'API AutoEstimate (voir core/parts_pricing.py et
+    core/parts_mapping.py), en plus du MOT déjà calculé par
+    appliquer_priorite_remplacement().
+
+    marque_id / model_id : résolus depuis metadata.json (voir 2_Collecte.py,
+        core/dossier_manager.create_dossier). Si absents (dossier créé sans
+        API ou avant cette fonctionnalité), aucune tentative n'est faite —
+        les items restent "à chiffrer manuellement".
+    types_choisis : {item_key(item): "original"|"adaptable"|"occasion"}
+    """
+    if not marque_id or not model_id:
+        return instances
+
+    from core.parts_pricing import get_estimation, AutoEstimateError
+    from core.parts_mapping import get_part_id
+
+    for item in instances:
+        if not item.get("remplacement_requis"):
+            continue
+
+        key = item_key(item)
+        type_piece = types_choisis.get(key, "occasion")
+        piece_ai = item.get("piece_ai_brut", "")
+
+        part_id = get_part_id(piece_ai)
+        detail = item.setdefault("cout_detail", {})
+
+        if part_id is None:
+            detail["avertissement_api"] = f"Pièce '{piece_ai}' non cartographiée vers AutoEstimate (voir core/parts_mapping.py)."
+            continue
+
+        try:
+            est = get_estimation(marque_id, model_id, part_id, type_piece, year)
+        except AutoEstimateError as e:
+            detail["avertissement_api"] = f"AutoEstimate indisponible : {e}"
+            continue
+
+        if est is None:
+            detail["avertissement_api"] = f"Aucune observation AutoEstimate pour ce type ({type_piece})."
+            continue
+
+        prix_piece = est.get("median")
+        item["prix_piece"] = prix_piece
+        item["type_piece"] = type_piece
+        item["estimation_detail"] = est  # median/average/minimum/maximum/observation_count
+
+        cout_mot = item.get("cout_mot")
+        if cout_mot is not None and prix_piece is not None:
+            item["cout"] = round(cout_mot + prix_piece, 2)
+            detail["prix_piece"] = prix_piece
+            detail["type_piece"] = type_piece
+            detail["total"] = item["cout"]
+            detail.pop("avertissement_api", None)
 
     return instances
 
@@ -198,13 +337,6 @@ def get_categorie_marque(marque: str) -> str:
         if marque in marques:
             return cat
     return "Standard"
-
-
-# ══════════════════════════════════════════════════════════════════
-# 4. CHARGEMENT DES MODÈLES (mis en cache)
-# ══════════════════════════════════════════════════════════════════
-
-
 
 
 def calculer_overlap(mask_d: np.ndarray, mask_p: np.ndarray) -> float:
@@ -438,8 +570,6 @@ def analyser(modele_pieces, modele_dommages, image_np: np.ndarray,
     }
 
 
-
-
 def calculer_agregats(instances: list) -> dict:
     """
     Calcule les totaux après application des règles métier.
@@ -462,7 +592,7 @@ def calculer_agregats(instances: list) -> dict:
     for it in instances:
         if it.get("chiffrage_bloque") is True:
             continue
-        if it.get("remplacement_requis") is True:
+        if it.get("remplacement_requis") is True and it.get("cout") is None:
             n_a_verifier += 1
             continue
         if it.get("cout") is None:
@@ -483,7 +613,21 @@ def calculer_agregats(instances: list) -> dict:
         for it in instances
         if it.get("cout") is not None
     )
-    total_fourniture = 0  # remplacement/fourniture hors barème actuel
+    total_mot = sum(
+        it.get("cout_mot") or 0
+        for it in instances
+        if it.get("remplacement_requis") is True
+    )
+    # Prix des pièces à remplacer — récupérés via l'API AutoEstimate
+    # (enrichir_prix_pieces() remplit item["prix_piece"] pour chaque
+    # item une fois le prix trouvé). Tant qu'une pièce n'a pas encore
+    # de prix, elle contribue 0 ici — jamais une valeur inventée — et
+    # reste comptée dans n_a_verifier ci-dessus.
+    total_fourniture = sum(
+        it.get("prix_piece") or 0
+        for it in instances
+        if it.get("remplacement_requis") is True
+    )
 
     return {
         "score_global": score_global,
@@ -492,10 +636,12 @@ def calculer_agregats(instances: list) -> dict:
         "total_mo_reparation": total_mo_reparation,
         "total_mo_peinture": total_mo_peinture,
         "total_produit_peinture": total_produit_peinture,
+        "total_mot": total_mot,
         "total_fourniture": total_fourniture,
     }
+# ==========================================================
 
-
+    
 # ==========================================================
 
 def dedupliquer_instances(toutes_instances: list) -> list:
@@ -504,7 +650,7 @@ def dedupliquer_instances(toutes_instances: list) -> list:
 
     RÈGLE :
     - Même pièce + même type de dommage = un seul dommage retenu.
-    - Seule la détection avec le score de confiance LE PLUS ÉLEVÉ est conservée 
+    - Seule la détection avec le score de confiance LE PLUS ÉLEVÉ est conservée
       (pour éviter de doubler le coût de réparation).
     - Les pièces non identifiées ne sont pas fusionnées.
     """
@@ -564,4 +710,3 @@ def dedupliquer_instances(toutes_instances: list) -> list:
         resultat.append(representant)
 
     return resultat
-
