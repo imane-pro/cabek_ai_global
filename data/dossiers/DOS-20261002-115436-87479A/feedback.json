@@ -1,0 +1,235 @@
+[
+  {
+    "feedback_id": "FB-20261002142540901165",
+    "dossier_id": "DOS-20261002-115436-87479A",
+    "created_at": "2026-10-02T14:25:40",
+    "detection_id": "DET-417A02929131A38A",
+    "piece_predite": "p_Phare avant gauche",
+    "piece_affichee": "Phare avant gauche",
+    "dommage_predit": "d_piece_manquante",
+    "classe_ia": "d_piece_manquante",
+    "confiance": 0.327963650226593,
+    "source_image": "avant_01.jpeg",
+    "images_sources": [
+      "avant_01.jpeg"
+    ],
+    "validation": "rejetee",
+    "raison": "Fausse détection",
+    "observation": "",
+    "piece_corrigee": "",
+    "dommage_corrige": "",
+    "model_version": "unknown"
+  },
+  {
+    "feedback_id": "FB-20261002142602943944",
+    "dossier_id": "DOS-20261002-115436-87479A",
+    "created_at": "2026-10-02T14:26:02",
+    "detection_id": "DET-5E5649B8D956FDD1",
+    "piece_predite": "p_Calandre",
+    "piece_affichee": "Calandre",
+    "dommage_predit": "d_piece_manquante",
+    "classe_ia": "d_piece_manquante",
+    "confiance": 0.702612042427063,
+    "source_image": "avant_01.jpeg",
+    "images_sources": [
+      "avant_01.jpeg"
+    ],
+    "validation": "rejetee",
+    "raison": "Fausse détection",
+    "observation": "",
+    "piece_corrigee": "",
+    "dommage_corrige": "",
+    "model_version": "unknown"
+  },
+  {
+    "feedback_id": "FB-20261002142618872536",
+    "dossier_id": "DOS-20261002-115436-87479A",
+    "created_at": "2026-10-02T14:26:18",
+    "detection_id": "DET-4D31B7498AA07E01",
+    "piece_predite": null,
+    "piece_affichee": "zone non identifiée",
+    "dommage_predit": "d_brise",
+    "classe_ia": "d_brise",
+    "confiance": 0.2790833115577698,
+    "source_image": "arriere_01.jpeg",
+    "images_sources": [
+      "arriere_01.jpeg"
+    ],
+    "validation": "rejetee",
+    "raison": "Fausse détection",
+    "observation": "",
+    "piece_corrigee": "",
+    "dommage_corrige": "",
+    "model_version": "unknown"
+  },
+  {
+    "feedback_id": "FB-20261002142632541650",
+    "dossier_id": "DOS-20261002-115436-87479A",
+    "created_at": "2026-10-02T14:26:32",
+    "detection_id": "DET-7D7F928EF3FB78AD",
+    "piece_predite": "p_Phare avant droit",
+    "piece_affichee": "Phare avant droit",
+    "dommage_predit": "d_rayure",
+    "classe_ia": "d_rayure",
+    "confiance": 0.40133777260780334,
+    "source_image": "details_01.jpeg",
+    "images_sources": [
+      "details_01.jpeg"
+    ],
+    "validation": "rejetee",
+    "raison": "Fausse détection",
+    "observation": "",
+    "piece_corrigee": "",
+    "dommage_corrige": "",
+    "model_version": "unknown"
+  },
+  {
+    "feedback_id": "FB-20261002142644724286",
+    "dossier_id": "DOS-20261002-115436-87479A",
+    "created_at": "2026-10-02T14:26:44",
+    "detection_id": "DET-E95FDC20098EA3AF",
+    "piece_predite": "p_Pare-chocs avant",
+    "piece_affichee": "Pare-chocs avant",
+    "dommage_predit": "d_fissure",
+    "classe_ia": "d_fissure",
+    "confiance": 0.20046281814575195,
+    "source_image": "avant_01.jpeg",
+    "images_sources": [
+      "avant_01.jpeg"
+    ],
+    "validation": "rejetee",
+    "raison": "Fausse détection",
+    "observation": "",
+    "piece_corrigee": "",
+    "dommage_corrige": "",
+    "model_version": "unknown"
+  },
+  {
+    "feedback_id": "FB-20261002143318676449",
+    "dossier_id": "DOS-20261002-115436-87479A",
+    "created_at": "2026-10-02T14:33:18",
+    "detection_id": "DET-D2D5BF8ECCB786F7",
+    "piece_predite": null,
+    "piece_affichee": "zone non identifiée",
+    "dommage_predit": "d_rayure",
+    "classe_ia": "d_rayure",
+    "confiance": 0.2569352984428406,
+    "source_image": "details_01.jpeg",
+    "images_sources": [
+      "details_01.jpeg"
+    ],
+    "validation": "rejetee",
+    "raison": "Mauvaise pièce",
+    "observation": "",
+    "piece_corrigee": "",
+    "dommage_corrige": "",
+    "model_version": "unknown"
+  },
+  {
+    "feedback_id": "FB-20261002142718691614",
+    "dossier_id": "DOS-20261002-115436-87479A",
+    "created_at": "2026-10-02T14:27:18",
+    "detection_id": "DET-3B10D5039A438266",
+    "piece_predite": "p_Pare-chocs arriere",
+    "piece_affichee": "Pare-chocs arriere",
+    "dommage_predit": "d_rayure",
+    "classe_ia": "d_rayure",
+    "confiance": 0.46773773431777954,
+    "source_image": "arriere_01.jpeg",
+    "images_sources": [
+      "arriere_01.jpeg"
+    ],
+    "validation": "rejetee",
+    "raison": "Fausse détection",
+    "observation": "",
+    "piece_corrigee": "",
+    "dommage_corrige": "",
+    "model_version": "unknown"
+  },
+  {
+    "feedback_id": "FB-20261002142812559012",
+    "dossier_id": "DOS-20261002-115436-87479A",
+    "created_at": "2026-10-02T14:28:12",
+    "detection_id": "DET-70763D9D44F26836",
+    "piece_predite": null,
+    "piece_affichee": "zone non identifiée",
+    "dommage_predit": "d_rayure",
+    "classe_ia": "d_rayure",
+    "confiance": 0.28028741478919983,
+    "source_image": "avant_01.jpeg",
+    "images_sources": [
+      "avant_01.jpeg"
+    ],
+    "validation": "rejetee",
+    "raison": "Fausse détection",
+    "observation": "",
+    "piece_corrigee": "",
+    "dommage_corrige": "",
+    "model_version": "unknown"
+  },
+  {
+    "feedback_id": "FB-20261002142756847344",
+    "dossier_id": "DOS-20261002-115436-87479A",
+    "created_at": "2026-10-02T14:27:56",
+    "detection_id": "DET-DF7EBE9DC3619F5F",
+    "piece_predite": "p_Coffre",
+    "piece_affichee": "Coffre",
+    "dommage_predit": "d_rayure",
+    "classe_ia": "d_rayure",
+    "confiance": 0.291380912065506,
+    "source_image": "arriere_01.jpeg",
+    "images_sources": [
+      "arriere_01.jpeg"
+    ],
+    "validation": "rejetee",
+    "raison": "Fausse détection",
+    "observation": "",
+    "piece_corrigee": "",
+    "dommage_corrige": "",
+    "model_version": "unknown"
+  },
+  {
+    "feedback_id": "FB-20261002143004883566",
+    "dossier_id": "DOS-20261002-115436-87479A",
+    "created_at": "2026-10-02T14:30:04",
+    "detection_id": "DET-C32593D985AA023C",
+    "piece_predite": "p_Pare-chocs avant",
+    "piece_affichee": "Pare-chocs avant",
+    "dommage_predit": "d_rayure",
+    "classe_ia": "d_rayure",
+    "confiance": 0.20205804705619812,
+    "source_image": "avant_01.jpeg",
+    "images_sources": [
+      "avant_01.jpeg"
+    ],
+    "validation": "rejetee",
+    "raison": "Fausse détection",
+    "observation": "",
+    "piece_corrigee": "",
+    "dommage_corrige": "",
+    "model_version": "unknown"
+  },
+  {
+    "feedback_id": "FB-20261003100902465687",
+    "dossier_id": "DOS-20261002-115436-87479A",
+    "created_at": "2026-10-03T10:09:02",
+    "detection_id": "DET-4CB7306F5022C001",
+    "piece_predite": "p_Aile arriere gauche",
+    "piece_affichee": "Aile arriere gauche",
+    "dommage_predit": "d_bosse",
+    "classe_ia": "d_bosse",
+    "confiance": 0.31486961245536804,
+    "source_image": "gauche_01.jpeg",
+    "images_sources": [
+      "gauche_01.jpeg"
+    ],
+    "validation": "acceptee",
+    "raison": "",
+    "observation": "",
+    "piece_corrigee": "",
+    "dommage_corrige": "",
+    "action_ia": "remplacement",
+    "action_experte": "reparation",
+    "model_version": "unknown"
+  }
+]

@@ -152,7 +152,7 @@ def normaliser_nom_piece(nom: str) -> str:
 
     nom = nom.strip().lower()
 
-    # Supprimer les accents
+    # Supprimer les accents 
     nom = unicodedata.normalize("NFD", nom)
 
     nom = "".join(

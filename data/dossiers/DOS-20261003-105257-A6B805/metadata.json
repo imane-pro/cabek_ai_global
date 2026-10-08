@@ -1,0 +1,45 @@
+{
+  "dossier_id": "DOS-20261003-105257-A6B805",
+  "marque": "Dacia",
+  "marque_id": 10,
+  "modele": "Sandero",
+  "model_id": 75,
+  "annee": "2026",
+  "matricule": "WW979804",
+  "expert": "",
+  "created_at": "2026-10-03T10:52:57",
+  "status": "À valider",
+  "photos": [
+    {
+      "view": "avant",
+      "view_label": "Vue avant",
+      "filename": "avant_01.jpeg",
+      "path": "photos\\avant_01.jpeg"
+    },
+    {
+      "view": "arriere",
+      "view_label": "Vue arrière",
+      "filename": "arriere_01.jpeg",
+      "path": "photos\\arriere_01.jpeg"
+    },
+    {
+      "view": "gauche",
+      "view_label": "Vue gauche",
+      "filename": "gauche_01.jpeg",
+      "path": "photos\\gauche_01.jpeg"
+    },
+    {
+      "view": "droite",
+      "view_label": "Vue droite",
+      "filename": "droite_01.jpeg",
+      "path": "photos\\droite_01.jpeg"
+    },
+    {
+      "view": "details",
+      "view_label": "Détails dommages",
+      "filename": "details_01.jpeg",
+      "path": "photos\\details_01.jpeg"
+    }
+  ],
+  "updated_at": "2026-10-07T12:02:53"
+}

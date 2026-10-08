@@ -41,6 +41,10 @@ VIEWS = {
 # ============================================================
 
 def safe_text(value: str) -> str:
+    """
+    Nettoie un texte afin de pouvoir l'utiliser
+    dans un nom de dossier ou de fichier.
+    """
 
     value = re.sub(
         r"[^A-Za-z0-9_-]+",
@@ -48,7 +52,7 @@ def safe_text(value: str) -> str:
         str(value).strip(),
     )
 
-    return value.strip("_") or "NA" 
+    return value.strip("_") or "NA"
 
 
 # ============================================================
@@ -56,6 +60,9 @@ def safe_text(value: str) -> str:
 # ============================================================
 
 def new_dossier_id() -> str:
+    """
+    Génère un identifiant unique pour un dossier.
+    """
 
     return (
         datetime.now().strftime(
@@ -72,6 +79,9 @@ def new_dossier_id() -> str:
 def dossier_path(
     dossier_id: str,
 ) -> Path:
+    """
+    Retourne le chemin physique d'un dossier.
+    """
 
     return DOSSIERS_DIR / safe_text(
         dossier_id
@@ -91,6 +101,9 @@ def create_dossier(
     model_id: int | None = None,
     expert: str = "",
 ) -> str:
+    """
+    Crée un nouveau dossier d'expertise.
+    """
 
     dossier_id = new_dossier_id()
 
@@ -109,7 +122,7 @@ def create_dossier(
 
         # ----------------------------------------------------
         # IDENTIFICATION DOSSIER
-        # ---------------------------------------------------- 
+        # ----------------------------------------------------
 
         "dossier_id": dossier_id,
 
@@ -168,6 +181,9 @@ def save_metadata(
     path: Path,
     metadata: Dict,
 ) -> None:
+    """
+    Sauvegarde le metadata.json du dossier.
+    """
 
     (
         path / "metadata.json"
@@ -188,6 +204,9 @@ def save_metadata(
 def load_metadata(
     dossier_id: str,
 ) -> Dict:
+    """
+    Charge les informations du dossier.
+    """
 
     path = dossier_path(
         dossier_id
@@ -218,6 +237,9 @@ def save_uploaded_photo(
     uploaded_file,
     index: int = 1,
 ) -> Path:
+    """
+    Sauvegarde une photo uploadée dans le dossier.
+    """
 
     if view_key not in VIEWS:
 
@@ -264,6 +286,9 @@ def register_photo(
     view_key: str,
     file_path: Path,
 ) -> None:
+    """
+    Ajoute une photo dans metadata.json.
+    """
 
     metadata = load_metadata(
         dossier_id
@@ -313,6 +338,9 @@ def set_status(
     dossier_id: str,
     status: str,
 ) -> None:
+    """
+    Modifie le statut du dossier.
+    """
 
     metadata = load_metadata(
         dossier_id
@@ -337,6 +365,9 @@ def set_status(
 # ============================================================
 
 def list_dossiers() -> List[Dict]:
+    """
+    Retourne la liste des dossiers disponibles.
+    """
 
     result = []
 
@@ -380,6 +411,10 @@ def list_dossiers() -> List[Dict]:
 def photo_paths(
     dossier_id: str,
 ) -> List[Dict]:
+    """
+    Retourne les photos physiques
+    associées au dossier.
+    """
 
     metadata = load_metadata(
         dossier_id
@@ -410,3 +445,234 @@ def photo_paths(
             )
 
     return result
+
+
+# ============================================================
+# FEEDBACK IA / VALIDATION EXPERT
+# ============================================================
+
+def feedback_path(
+    dossier_id: str,
+) -> Path:
+    """
+    Retourne le chemin du fichier feedback.json
+    du dossier.
+    """
+
+    return (
+        dossier_path(dossier_id)
+        / "feedback.json"
+    )
+
+
+# ============================================================
+# CHARGER FEEDBACK
+# ============================================================
+
+def load_feedback(
+    dossier_id: str,
+) -> List[Dict]:
+    """
+    Charge tous les feedbacks du dossier.
+
+    Si le fichier n'existe pas ou s'il est invalide,
+    une liste vide est retournée.
+    """
+
+    path = feedback_path(
+        dossier_id
+    )
+
+    if not path.exists():
+        return []
+
+    try:
+
+        data = json.loads(
+            path.read_text(
+                encoding="utf-8"
+            )
+        )
+
+        if not isinstance(
+            data,
+            list,
+        ):
+            return []
+
+        return data
+
+    except Exception:
+
+        return []
+
+
+# ============================================================
+# SAUVEGARDER FEEDBACK
+# ============================================================
+
+def save_feedback(
+    dossier_id: str,
+    feedback: Dict,
+) -> None:
+    """
+    Ajoute un feedback expert au dossier.
+
+    Le feedback est conservé afin de permettre
+    l'analyse des erreurs et le futur réentraînement
+    des modèles IA.
+    """
+
+    path = feedback_path(
+        dossier_id
+    )
+
+    feedbacks = load_feedback(
+        dossier_id
+    )
+
+    feedbacks.append(
+        feedback
+    )
+
+    path.write_text(
+        json.dumps(
+            feedbacks,
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+
+# ============================================================
+# CRÉER FEEDBACK
+# ============================================================
+
+def create_feedback(
+    dossier_id: str,
+    item: Dict,
+    validation: str,
+    raison: str = "",
+    observation: str = "",
+    expert: str = "",
+    correction_piece: str = "",
+    correction_dommage: str = "",
+) -> Dict:
+    """
+    Construit et sauvegarde un feedback humain.
+
+    validation peut être :
+
+        acceptee
+        rejetee
+        corrigee
+    """
+
+    feedback = {
+
+        # ----------------------------------------------------
+        # IDENTIFICATION FEEDBACK
+        # ----------------------------------------------------
+
+        "feedback_id": str(
+            uuid.uuid4()
+        ),
+
+        "dossier_id": dossier_id,
+
+        "created_at": (
+            datetime.now().isoformat(
+                timespec="seconds"
+            )
+        ),
+
+        "expert": expert,
+
+        # ----------------------------------------------------
+        # IDENTIFICATION DÉTECTION
+        # ----------------------------------------------------
+
+        "detection_id": item.get(
+            "detection_id"
+        ),
+
+        # ----------------------------------------------------
+        # PRÉDICTION PIÈCE
+        # ----------------------------------------------------
+
+        "piece_predite": item.get(
+            "piece_ai_brut"
+        ),
+
+        "piece_affichee": item.get(
+            "piece"
+        ),
+
+        # ----------------------------------------------------
+        # PRÉDICTION DOMMAGE
+        # ----------------------------------------------------
+
+        "dommage_predit": item.get(
+            "type_brut"
+        ),
+
+        "classe_ia": item.get(
+            "classe_ia"
+        ),
+
+        "confiance": item.get(
+            "confiance"
+        ),
+
+        # ----------------------------------------------------
+        # IMAGE
+        # ----------------------------------------------------
+
+        "source_image": item.get(
+            "source_image"
+        ),
+
+        "images_sources": item.get(
+            "images_sources",
+            [],
+        ),
+
+        # ----------------------------------------------------
+        # VALIDATION EXPERT
+        # ----------------------------------------------------
+
+        "validation": validation,
+
+        "raison": raison,
+
+        "observation": observation,
+
+        # ----------------------------------------------------
+        # CORRECTION EXPERT
+        # ----------------------------------------------------
+
+        "piece_corrigee": (
+            correction_piece
+        ),
+
+        "dommage_corrige": (
+            correction_dommage
+        ),
+
+        # ----------------------------------------------------
+        # VERSION MODÈLE
+        # ----------------------------------------------------
+
+        "model_version": item.get(
+            "model_version",
+            "unknown",
+        ),
+    }
+
+    save_feedback(
+        dossier_id,
+        feedback,
+    )
+
+    return feedback

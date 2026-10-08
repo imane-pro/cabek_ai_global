@@ -158,7 +158,7 @@ AI_PIECE_VERS_CANONICAL = {
 }
 
 # ══════════════════════════════════════════════════════════════
-# 6. MAPPING : gravité IA (low/mid/high) → colonne du barème réparation
+# 6. MAPPING : gravité IA (low/mid/high) → colonne du barème réparation 
 # ══════════════════════════════════════════════════════════════
 GRAVITE_VERS_BAREME = {"low": "leger", "mid": "moyen", "high": "fort"}
 LABEL_GRAVITE_BAREME = {"leger": "Léger", "moyen": "Moyen", "fort": "Fort"}

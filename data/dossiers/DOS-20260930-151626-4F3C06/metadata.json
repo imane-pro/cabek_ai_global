@@ -1,12 +1,13 @@
 {
-  "dossier_id": "DOS-20260922-141140-1D1E11",
-  "marque": "Dacia",
-  "modele": "Logan",
-  "annee": "2004",
-  "matricule": "12345-A-9",
-  "marque_id": 10,
-  "model_id": 74,
-  "created_at": "2026-09-22T14:11:40",
+  "dossier_id": "DOS-20260930-151626-4F3C06",
+  "marque": "Audi",
+  "marque_id": 2,
+  "modele": "A1",
+  "model_id": 5,
+  "annee": "2020",
+  "matricule": "1234-E-3",
+  "expert": "",
+  "created_at": "2026-09-30T15:16:26",
   "status": "À valider",
   "photos": [
     {
@@ -32,13 +33,7 @@
       "view_label": "Vue droite",
       "filename": "droite_01.jpg",
       "path": "photos\\droite_01.jpg"
-    },
-    {
-      "view": "details",
-      "view_label": "Détails dommages",
-      "filename": "details_01.jpg",
-      "path": "photos\\details_01.jpg"
     }
   ],
-  "updated_at": "2026-10-03T11:48:51"
+  "updated_at": "2026-10-07T12:27:41"
 }
